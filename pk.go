@@ -2,10 +2,12 @@ package pk
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
 
+	"github.com/huandu/xstrings"
 	"github.com/uber/h3-go"
 )
 
@@ -24,7 +26,7 @@ var (
 	BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
 	UNUSED_RESOLUTION_FILLER = int64(math.Pow(2, (3*(15-BASE_RESOLUTION))-1))
 	ALPHABET                 string
-	ALPHABET_LENGTH          int
+	ALPHABET_LENGTH          int64
 	HEADER_BITS              string
 	HEADER_INT               int64 = 0
 	FIRST_TUPLE_REGEX        string
@@ -53,7 +55,7 @@ func init() {
 
 func init_ALPHABET_LENGTH() {
 	ALPHABET = strings.ToLower(ALPHABET_BASE)
-	ALPHABET_LENGTH = len(ALPHABET)
+	ALPHABET_LENGTH = int64(len(ALPHABET))
 
 	FIRST_TUPLE_REGEX = "[" + ALPHABET + REPLACEMENT_CHARS + PADDING_CHAR + "]{3}"
 	TUPLE_REGEX = "[" + ALPHABET + REPLACEMENT_CHARS + "]{3}"
@@ -67,15 +69,6 @@ func zfill(rawString string, padString string, expectLength int) string {
 	return rawString
 }
 
-// https://stackoverflow.com/a/4965535
-func reverse(s string) string {
-	var result string
-	for _, v := range s {
-		result = string(v) + result
-	}
-	return result
-}
-
 func init_H3_HEADER() {
 	idx := strconv.FormatInt(
 		int64(
@@ -86,6 +79,7 @@ func init_H3_HEADER() {
 		2)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
+	// filled := xstrings.LeftJustify(idx, 64, "0")
 	filled := zfill(idx, "0", 64)
 	bits := filled[:12]
 	if bits != "000010001010" {
@@ -93,7 +87,7 @@ func init_H3_HEADER() {
 	}
 	HEADER_BITS = bits
 
-	for index, char := range reverse(HEADER_BITS) {
+	for index, char := range xstrings.Reverse(HEADER_BITS) {
 		intV, err := strconv.ParseInt(string(char), 10, 0)
 		if err != nil {
 			panic(err)
@@ -126,4 +120,45 @@ func UnshortenH3Integer(shortInt int64) int64 {
 	unshifted_int := shortInt << (3 * (15 - BASE_RESOLUTION))
 	rebuilt_int := HEADER_INT + UNUSED_RESOLUTION_FILLER - BASE_CELL_SHIFT + unshifted_int
 	return rebuilt_int
+}
+
+func EncodeH3Int(h3Int int64) string {
+	shortH3Int := ShortenH3Integer(h3Int)
+	encoedH3Int := EncodeShortInt(shortH3Int)
+	cleanEncoedShortH3 := CleanString(encoedH3Int)
+	if len(cleanEncoedShortH3) <= CODE_LENGTH {
+		cleanEncoedShortH3 = xstrings.RightJustify(cleanEncoedShortH3, CODE_LENGTH, PADDING_CHAR)
+	}
+	parts := []string{}
+	for i := 0; i < len(cleanEncoedShortH3); i += TUPLE_LENGTH {
+		parts = append(parts, cleanEncoedShortH3[i:i+TUPLE_LENGTH])
+	}
+	return "@" + strings.Join(parts, "-")
+}
+
+func EncodeShortInt(shortInt int64) string {
+	if shortInt == 0 {
+		return fmt.Sprintf("%c", ALPHABET[0])
+	}
+	res := ""
+	for shortInt > 0 {
+		remainder := shortInt % ALPHABET_LENGTH
+		res = fmt.Sprintf("%c", ALPHABET[remainder]) + res
+		shortInt = int64(shortInt / ALPHABET_LENGTH)
+	}
+	return res
+}
+
+func CleanString(s string) string {
+	for k, v := range REPLACEMENT_MAP {
+		s = strings.Replace(s, k, v, -1)
+	}
+	return s
+}
+
+func GeoToPlacekey(lat, long float64) string {
+	return EncodeH3Int(int64(h3.FromGeo(
+		h3.GeoCoord{Latitude: lat, Longitude: long},
+		RESOLUTION,
+	)))
 }
