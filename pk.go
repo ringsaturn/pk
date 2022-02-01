@@ -1,7 +1,6 @@
-// Package pk provide part of https://github.com/Placekey/placekey-py features
-// in pure Go.
-//
+// Package pk provide part of https://github.com/Placekey/placekey-py features in pure Go.
 // Most of codes translated from Python code.
+// See details in https://docs.placekey.io/Placekey_Encoding_Specification_White_Paper.pdf
 package pk
 
 import (
@@ -29,12 +28,12 @@ const (
 var (
 	BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
 	UNUSED_RESOLUTION_FILLER = int64(math.Pow(2, (3*(15-BASE_RESOLUTION))-1))
-	ALPHABET                 string
-	ALPHABET_LENGTH          int64
-	HEADER_BITS              string
-	HEADER_INT               int64 = 0
-	FIRST_TUPLE_REGEX        string
-	TUPLE_REGEX              string
+	ALPHABET                 string // build in init
+	ALPHABET_LENGTH          int64  // build in init
+	HEADER_BITS              string // build in init
+	HEADER_INT               int64  // build in init
+	FIRST_TUPLE_REGEX        string // build in init
+	TUPLE_REGEX              string // build in init
 	REPLACEMENT_MAP          = map[string]string{
 		"prn":   "pre",
 		"f4nny": "f4nne",
@@ -201,7 +200,8 @@ func decodeString(s string) int64 {
 	reversedS := xstrings.Reverse(s)
 	for i := 0; i < len(s); i++ {
 		targetTogetIndex := fmt.Sprintf("%c", reversedS[i])
-		val += int64(math.Pow(float64(ALPHABET_LENGTH), float64(i))) * int64(strings.Index(ALPHABET, targetTogetIndex))
+		val += int64(math.Pow(float64(ALPHABET_LENGTH), float64(i))) *
+			int64(strings.Index(ALPHABET, targetTogetIndex))
 	}
 	return val
 }
@@ -228,5 +228,6 @@ func PlacekeyToGeo(placekey string) (float64, float64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	return h3.ToGeo(*idx).Latitude, h3.ToGeo(*idx).Longitude, nil
+	h3Idx := h3.ToGeo(*idx)
+	return h3Idx.Latitude, h3Idx.Longitude, nil
 }
