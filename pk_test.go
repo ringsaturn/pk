@@ -1,8 +1,11 @@
-package pk
+package pk_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
+
+	"github.com/ringsaturn/pk"
 )
 
 func TestGeoToPlacekey(t *testing.T) {
@@ -23,10 +26,18 @@ func TestGeoToPlacekey(t *testing.T) {
 			},
 			want: "@dvt-smp-tvz",
 		},
+		{
+			name: "New York",
+			args: args{
+				long: -74.006058,
+				lat:  40.712772,
+			},
+			want: "@627-wbz-tjv",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GeoToPlacekey(tt.args.lat, tt.args.long); got != tt.want {
+			if got := pk.GeoToPlacekey(tt.args.lat, tt.args.long); got != tt.want {
 				t.Errorf("GeoToPlacekey() = %v, want %v", got, tt.want)
 			}
 		})
@@ -57,10 +68,19 @@ func TestPlacekeyToGeo(t *testing.T) {
 			want1:   0,
 			wantErr: false,
 		},
+		{
+			name: "New York",
+			args: args{
+				placekey: "@627-wbz-tjv",
+			},
+			want:    40.712772,
+			want1:   -74.006058,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := PlacekeyToGeo(tt.args.placekey)
+			got, got1, err := pk.PlacekeyToGeo(tt.args.placekey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PlacekeyToGeo() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -73,4 +93,9 @@ func TestPlacekeyToGeo(t *testing.T) {
 			}
 		})
 	}
+}
+
+func ExampleGeoToPlacekey() {
+	fmt.Println(pk.GeoToPlacekey(39.9289, 116.3883))
+	// Output: @6qk-v3d-brk
 }
