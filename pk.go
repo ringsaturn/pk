@@ -1,3 +1,7 @@
+// Package pk provide part of https://github.com/Placekey/placekey-py features
+// in pure Go.
+//
+// Most of codes translated from Python code.
 package pk
 
 import (
@@ -107,8 +111,8 @@ func GeoDistance(lat1, long1, lat2, long2 float64) float64 {
 	return 2 * EARTH_RADIUS * math.Asin(radical) * 1000
 }
 
-// ShortenH3Integer shorten an H3 integer to only include location data up to the base resolution
-func ShortenH3Integer(h3Int int64) int64 {
+// shortenH3Integer shorten an H3 integer to only include location data up to the base resolution
+func shortenH3Integer(h3Int int64) int64 {
 	// Cuts off the 12 left-most bits that don't code location
 	out := (h3Int + BASE_CELL_SHIFT) % int64(math.Pow(2, 52))
 	// Cuts off the rightmost bits corresponding to resolutions greater than the base resolution
@@ -116,16 +120,16 @@ func ShortenH3Integer(h3Int int64) int64 {
 	return out
 }
 
-func UnshortenH3Integer(shortInt int64) int64 {
+func unshortenH3Integer(shortInt int64) int64 {
 	unshifted_int := shortInt << (3 * (15 - BASE_RESOLUTION))
 	rebuilt_int := HEADER_INT + UNUSED_RESOLUTION_FILLER - BASE_CELL_SHIFT + unshifted_int
 	return rebuilt_int
 }
 
-func EncodeH3Int(h3Int int64) string {
-	shortH3Int := ShortenH3Integer(h3Int)
-	encoedH3Int := EncodeShortInt(shortH3Int)
-	cleanEncoedShortH3 := CleanString(encoedH3Int)
+func encodeH3Int(h3Int int64) string {
+	shortH3Int := shortenH3Integer(h3Int)
+	encoedH3Int := encodeShortInt(shortH3Int)
+	cleanEncoedShortH3 := cleanString(encoedH3Int)
 	if len(cleanEncoedShortH3) <= CODE_LENGTH {
 		cleanEncoedShortH3 = xstrings.RightJustify(cleanEncoedShortH3, CODE_LENGTH, PADDING_CHAR)
 	}
@@ -136,7 +140,7 @@ func EncodeH3Int(h3Int int64) string {
 	return "@" + strings.Join(parts, "-")
 }
 
-func EncodeShortInt(shortInt int64) string {
+func encodeShortInt(shortInt int64) string {
 	if shortInt == 0 {
 		return fmt.Sprintf("%c", ALPHABET[0])
 	}
@@ -149,7 +153,7 @@ func EncodeShortInt(shortInt int64) string {
 	return res
 }
 
-func CleanString(s string) string {
+func cleanString(s string) string {
 	for k, v := range REPLACEMENT_MAP {
 		s = strings.Replace(s, k, v, -1)
 	}
@@ -157,8 +161,72 @@ func CleanString(s string) string {
 }
 
 func GeoToPlacekey(lat, long float64) string {
-	return EncodeH3Int(int64(h3.FromGeo(
+	return encodeH3Int(int64(h3.FromGeo(
 		h3.GeoCoord{Latitude: lat, Longitude: long},
 		RESOLUTION,
 	)))
+}
+
+func parsePlacekey(placekey string) (string, string, error) {
+	what, where := "", ""
+	if strings.Contains(placekey, "@") {
+		parts := strings.Split(placekey, "@")
+		if len(parts) != 2 {
+			return what, where, errors.New("bad placekey")
+		}
+		what = parts[0]
+		where = parts[1]
+	} else {
+		where = placekey
+	}
+	return what, where, nil
+}
+
+func stripEncoding(s string) string {
+	s = strings.Replace(s, "@", "", -1)
+	s = strings.Replace(s, "-", "", -1)
+	s = strings.Replace(s, PADDING_CHAR, "", -1)
+	return s
+}
+
+func dirtyString(s string) string {
+	for k, v := range REPLACEMENT_MAP {
+		s = strings.Replace(s, k, v, -1)
+	}
+	return s
+}
+
+func decodeString(s string) int64 {
+	var val int64
+	reversedS := xstrings.Reverse(s)
+	for i := 0; i < len(s); i++ {
+		targetTogetIndex := fmt.Sprintf("%c", reversedS[i])
+		val += int64(math.Pow(float64(ALPHABET_LENGTH), float64(i))) * int64(strings.Index(ALPHABET, targetTogetIndex))
+	}
+	return val
+}
+
+func decodeToH3Int(wherePart string) int64 {
+	code := stripEncoding(wherePart)
+	dirtyEncoding := dirtyString(code)
+	shortedInt := decodeString(dirtyEncoding)
+	return unshortenH3Integer(shortedInt)
+}
+
+func PlacekeyToH3(placekey string) (*h3.H3Index, error) {
+	_, where, err := parsePlacekey(placekey)
+	if err != nil {
+		return nil, err
+	}
+	h3Int := decodeToH3Int(where)
+	idx := h3.FromString(strconv.FormatUint(uint64(h3Int), 16))
+	return &idx, nil
+}
+
+func PlacekeyToGeo(placekey string) (float64, float64, error) {
+	idx, err := PlacekeyToH3(placekey)
+	if err != nil {
+		return 0, 0, err
+	}
+	return h3.ToGeo(*idx).Latitude, h3.ToGeo(*idx).Longitude, nil
 }
