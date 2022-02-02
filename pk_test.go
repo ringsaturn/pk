@@ -104,7 +104,8 @@ func TestPlacekeyToGeo(t *testing.T) {
 }
 
 func ExampleGeoToPlacekey() {
-	fmt.Println(pk.GeoToPlacekey(39.9289, 116.3883))
+	k, _ := pk.GeoToPlacekey(39.9289, 116.3883)
+	fmt.Println(k)
 	// Output: @6qk-v3d-brk
 }
 
