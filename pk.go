@@ -1,14 +1,14 @@
 // Package pk provide part of https://github.com/Placekey/placekey-py features in pure Go.
-// Most of codes translated from Python code.
+// Most of codes translated from Python SDK.
 // See details in https://docs.placekey.io/Placekey_Encoding_Specification_White_Paper.pdf
 //
-// Placekey has two part: what, where.
+// Placekey has two parts: `what` and  `where`.
 //
-// The where part.
-// The core of where part is cut 21 bits of 64-bit integer, only use 43 bits.
-// Because the resolution is a const 10, so each H3 id under the same resolution
-// could remove some info.
-// Then use alphabet represent the 43-bit integer as the where part of the whole place key.
+// The `where` part.
+// The core of `where` part is cut 21 bits of 64-bit integer which is a H3 integer, only use 43 bits left.
+// Because the resolution is a const `10`, so each H3 id under the same resolution
+// could remove common info.
+// Then use alphabet represent the 43-bit integer as the `where` part of the whole place key.
 package pk
 
 import (
@@ -167,11 +167,14 @@ func cleanString(s string) string {
 	return s
 }
 
-func GeoToPlacekey(lat, long float64) string {
+func GeoToPlacekey(lat, long float64) (string, error) {
+	if lat < -90 || lat > 90 || long < -180 || long > 180 {
+		return "", errors.New("invalid lat/long range")
+	}
 	return encodeH3Int(int64(h3.FromGeo(
 		h3.GeoCoord{Latitude: lat, Longitude: long},
 		RESOLUTION,
-	)))
+	))), nil
 }
 
 func parsePlacekey(placekey string) (string, string, error) {

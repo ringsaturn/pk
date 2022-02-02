@@ -14,9 +14,10 @@ func TestGeoToPlacekey(t *testing.T) {
 		long float64
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
 		{
 			name: "0,0",
@@ -24,7 +25,8 @@ func TestGeoToPlacekey(t *testing.T) {
 				long: 0,
 				lat:  0,
 			},
-			want: "@dvt-smp-tvz",
+			want:    "@dvt-smp-tvz",
+			wantErr: false,
 		},
 		{
 			name: "New York",
@@ -32,12 +34,18 @@ func TestGeoToPlacekey(t *testing.T) {
 				long: -74.006058,
 				lat:  40.712772,
 			},
-			want: "@627-wbz-tjv",
+			want:    "@627-wbz-tjv",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := pk.GeoToPlacekey(tt.args.lat, tt.args.long); got != tt.want {
+			got, err := pk.GeoToPlacekey(tt.args.lat, tt.args.long)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GeoToPlacekey() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("GeoToPlacekey() = %v, want %v", got, tt.want)
 			}
 		})
@@ -98,4 +106,10 @@ func TestPlacekeyToGeo(t *testing.T) {
 func ExampleGeoToPlacekey() {
 	fmt.Println(pk.GeoToPlacekey(39.9289, 116.3883))
 	// Output: @6qk-v3d-brk
+}
+
+func ExamplePlacekeyToGeo() {
+	lat, long, _ := pk.PlacekeyToGeo("@6qk-v3d-brk")
+	fmt.Printf("%.3f %.3f \n", lat, long)
+	// Output: 39.929 116.388
 }
