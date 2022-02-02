@@ -13,7 +13,6 @@ package pk
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -149,12 +148,12 @@ func encodeH3Int(h3Int int64) string {
 
 func encodeShortInt(shortInt int64) string {
 	if shortInt == 0 {
-		return fmt.Sprintf("%c", ALPHABET[0])
+		return string(ALPHABET[0])
 	}
 	res := ""
 	for shortInt > 0 {
 		remainder := shortInt % ALPHABET_LENGTH
-		res = fmt.Sprintf("%c", ALPHABET[remainder]) + res
+		res = string(ALPHABET[remainder]) + res
 		shortInt = int64(shortInt / ALPHABET_LENGTH)
 	}
 	return res
@@ -210,7 +209,7 @@ func decodeString(s string) int64 {
 	var val int64
 	reversedS := xstrings.Reverse(s)
 	for i := 0; i < len(s); i++ {
-		targetTogetIndex := fmt.Sprintf("%c", reversedS[i])
+		targetTogetIndex := string(reversedS[i])
 		val += int64(math.Pow(float64(ALPHABET_LENGTH), float64(i))) *
 			int64(strings.Index(ALPHABET, targetTogetIndex))
 	}
