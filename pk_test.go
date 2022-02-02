@@ -103,6 +103,18 @@ func TestPlacekeyToGeo(t *testing.T) {
 	}
 }
 
+func BenchmarkGeoToPlacekey(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _ = pk.GeoToPlacekey(39.9289, 116.3883)
+	}
+}
+
+func BenchmarkPlacekeyToGeo(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		_, _, _ = pk.PlacekeyToGeo("@6qk-v3d-brk")
+	}
+}
+
 func ExampleGeoToPlacekey() {
 	k, _ := pk.GeoToPlacekey(39.9289, 116.3883)
 	fmt.Println(k)
