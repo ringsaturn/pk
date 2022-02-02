@@ -110,7 +110,18 @@ func init_H3_HEADER() {
 	}
 }
 
+// Degrees × π / 180
+
+func radians(degree float64) float64 {
+	return degree * math.Pi / 180
+}
+
 func GeoDistance(lat1, long1, lat2, long2 float64) float64 {
+	lat1 = radians(lat1)
+	long1 = radians(long1)
+	lat2 = radians(lat2)
+	long2 = radians(long2)
+
 	hav_lat := 0.5 * (1 - math.Cos(lat1-lat2))
 	hav_long := 0.5 * (1 - math.Cos(long1-long2))
 	radical := math.Sqrt(hav_lat + math.Cos(lat1)*math.Cos(lat2)*hav_long)
@@ -242,4 +253,17 @@ func PlacekeyToGeo(placekey string) (float64, float64, error) {
 	}
 	h3Idx := h3.ToGeo(*idx)
 	return h3Idx.Latitude, h3Idx.Longitude, nil
+}
+
+func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
+	lat1, long1, err := PlacekeyToGeo(pk1)
+	if err != nil {
+		return 0, err
+	}
+
+	lat2, long2, err := PlacekeyToGeo(pk2)
+	if err != nil {
+		return 0, err
+	}
+	return GeoDistance(lat1, long1, lat2, long2), nil
 }

@@ -126,3 +126,9 @@ func ExamplePlacekeyToGeo() {
 	fmt.Printf("%.3f %.3f \n", lat, long)
 	// Output: 39.929 116.388
 }
+
+func ExamplePlacekeyDistance() {
+	dist, _ := pk.PlacekeyDistance("@qjk-m7r-whq", "@hvb-5d7-92k")
+	fmt.Printf("%.1f\n", dist/1000)
+	// Output: 13597.5
+}
