@@ -1,4 +1,8 @@
-# WIP: Placekey's Go impl [![ci](https://github.com/ringsaturn/pk/actions/workflows/ci.yml/badge.svg)](https://github.com/ringsaturn/pk/actions/workflows/ci.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/ringsaturn/pk.svg)](https://pkg.go.dev/github.com/ringsaturn/pk)
+# Unofficial Placekey Go SDK [![ci](https://github.com/ringsaturn/pk/actions/workflows/ci.yml/badge.svg)](https://github.com/ringsaturn/pk/actions/workflows/ci.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/ringsaturn/pk.svg)](https://pkg.go.dev/github.com/ringsaturn/pk)
+
+```bash
+go install github.com/ringsaturn/pk
+```
 
 References:
 

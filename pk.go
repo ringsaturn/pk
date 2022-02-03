@@ -17,6 +17,7 @@ package pk
 import (
 	"errors"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -38,13 +39,15 @@ const (
 var (
 	_BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
 	_UNUSED_RESOLUTION_FILLER = int64(math.Pow(2, (3*(15-_BASE_RESOLUTION))-1))
-	_ALPHABET                 string // build in init
-	_ALPHABET_LENGTH          int64  // build in init
-	_HEADER_BITS              string // build in init
-	_HEADER_INT               int64  // build in init
-	// _FIRST_TUPLE_REGEX        string // build in init
-	// _TUPLE_REGEX              string // build in init
-	_REPLACEMENT_MAP = map[string]string{
+	_ALPHABET                 string         // build in init
+	_ALPHABET_LENGTH          int64          // build in init
+	_HEADER_BITS              string         // build in init
+	_HEADER_INT               int64          // build in init
+	_FIRST_TUPLE_REGEX        string         // build in init
+	_TUPLE_REGEX              string         // build in init
+	_WHERE_REGEX              *regexp.Regexp // build in init
+	_WHAT_REGEX               *regexp.Regexp // build in init
+	_REPLACEMENT_MAP          = map[string]string{
 		"prn":   "pre",
 		"f4nny": "f4nne",
 		"tw4t":  "tw4e",
@@ -70,8 +73,10 @@ func init_ALPHABET_LENGTH() {
 	_ALPHABET = strings.ToLower(_ALPHABET_BASE)
 	_ALPHABET_LENGTH = int64(len(_ALPHABET))
 
-	// _FIRST_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + _PADDING_CHAR + "]{3}"
-	// _TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + "]{3}"
+	_FIRST_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + _PADDING_CHAR + "]{3}"
+	_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + "]{3}"
+	_WHERE_REGEX = regexp.MustCompile("^" + strings.Join([]string{_FIRST_TUPLE_REGEX, _TUPLE_REGEX, _TUPLE_REGEX}, "-") + "$")
+	_WHAT_REGEX = regexp.MustCompile("^[" + _ALPHABET + "]{3,}(-[" + _ALPHABET + "]{3,})?$")
 }
 
 func zfill(rawString string, padString string, expectLength int) string {
@@ -267,4 +272,27 @@ func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
 		return 0, err
 	}
 	return geoDistance(lat1, long1, lat2, long2), nil
+}
+
+func validateWhat(what string) bool {
+	return _WHAT_REGEX.MatchString(what)
+}
+
+func validateWhere(where string) bool {
+	h, err := PlacekeyToH3(where)
+	if err != nil {
+		return false
+	}
+	return _WHERE_REGEX.MatchString(where) && h3.IsValid(*h)
+}
+
+func ValidatePlacekey(pk string) bool {
+	what, where, err := parsePlacekey(pk)
+	if err != nil {
+		return false
+	}
+	if what == "" {
+		return validateWhere(where)
+	}
+	return validateWhat(what) && validateWhere(where)
 }
