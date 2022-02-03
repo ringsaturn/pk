@@ -17,6 +17,7 @@ package pk
 import (
 	"errors"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -25,25 +26,37 @@ import (
 )
 
 const (
+	// below const are copy from Python SDK and most of them can be found from
+	// Placekey white paper pdf.
 	_RESOLUTION        = 10
 	_BASE_RESOLUTION   = 12
-	_EARTH_RADIUS      = 6371 // km
-	_ALPHABET_BASE     = "23456789BCDFGHJKMNPQRSTVWXYZ"
+	_EARTH_RADIUS      = 6371                           // km, for distance computing
+	_ALPHABET_BASE     = "23456789BCDFGHJKMNPQRSTVWXYZ" // will be lower case when ini
 	_CODE_LENGTH       = 9
 	_TUPLE_LENGTH      = 3
 	_PADDING_CHAR      = "a"
 	_REPLACEMENT_CHARS = "eu"
 )
 
+// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID.
+// Or will failed when `h3.IsValid(xxx)`.
+// TODO: check why Go SDK need this but Python SDK doesn't.
+const _HIGH_RESOLUTION_SHIFT = 255
+
 var (
 	_BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
 	_UNUSED_RESOLUTION_FILLER = int64(math.Pow(2, (3*(15-_BASE_RESOLUTION))-1))
-	_ALPHABET                 string // build in init
-	_ALPHABET_LENGTH          int64  // build in init
-	_HEADER_BITS              string // build in init
-	_HEADER_INT               int64  // build in init
-	// _FIRST_TUPLE_REGEX        string // build in init
-	// _TUPLE_REGEX              string // build in init
+	_ALPHABET                 string         // build in init
+	_ALPHABET_LENGTH          int64          // build in init
+	_HEADER_BITS              string         // build in init
+	_HEADER_INT               int64          // build in init
+	_FIRST_TUPLE_REGEX        string         // build in init
+	_TUPLE_REGEX              string         // build in init
+	_WHERE_REGEX              *regexp.Regexp // build in init
+	_WHAT_REGEX               *regexp.Regexp // build in init
+)
+
+var (
 	_REPLACEMENT_MAP = map[string]string{
 		"prn":   "pre",
 		"f4nny": "f4nne",
@@ -70,10 +83,13 @@ func init_ALPHABET_LENGTH() {
 	_ALPHABET = strings.ToLower(_ALPHABET_BASE)
 	_ALPHABET_LENGTH = int64(len(_ALPHABET))
 
-	// _FIRST_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + _PADDING_CHAR + "]{3}"
-	// _TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + "]{3}"
+	_FIRST_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + _PADDING_CHAR + "]{3}"
+	_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + "]{3}"
+	_WHERE_REGEX = regexp.MustCompile("^" + strings.Join([]string{_FIRST_TUPLE_REGEX, _TUPLE_REGEX, _TUPLE_REGEX}, "-") + "$")
+	_WHAT_REGEX = regexp.MustCompile("^[" + _ALPHABET + "]{3,}(-[" + _ALPHABET + "]{3,})?$")
 }
 
+// zfill like Python's zfill
 func zfill(rawString string, padString string, expectLength int) string {
 	diff := expectLength - len(rawString)
 	if diff > 0 {
@@ -92,7 +108,6 @@ func init_H3_HEADER() {
 		2)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
-	// filled := xstrings.LeftJustify(idx, 64, "0")
 	filled := zfill(idx, "0", 64)
 	bits := filled[:12]
 	if bits != "000010001010" {
@@ -141,7 +156,7 @@ func shortenH3Integer(h3Int int64) int64 {
 func unshortenH3Integer(shortInt int64) int64 {
 	unshifted_int := shortInt << (3 * (15 - _BASE_RESOLUTION))
 	rebuilt_int := _HEADER_INT + _UNUSED_RESOLUTION_FILLER - _BASE_CELL_SHIFT + unshifted_int
-	return rebuilt_int
+	return rebuilt_int + _HIGH_RESOLUTION_SHIFT
 }
 
 func encodeH3Int(h3Int int64) string {
@@ -267,4 +282,29 @@ func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
 		return 0, err
 	}
 	return geoDistance(lat1, long1, lat2, long2), nil
+}
+
+func validateWhat(what string) bool {
+	return _WHAT_REGEX.MatchString(what)
+}
+
+func validateWhere(where string) bool {
+	h, err := PlacekeyToH3(where)
+	if err != nil {
+		return false
+	}
+	return _WHERE_REGEX.MatchString(where) && h3.IsValid(*h)
+}
+
+// ValidatePlacekey will use Regex and H3 to
+// validate Placekey's what(if provided) and where part.
+func ValidatePlacekey(pk string) bool {
+	what, where, err := parsePlacekey(pk)
+	if err != nil {
+		return false
+	}
+	if what == "" {
+		return validateWhere(where)
+	}
+	return validateWhat(what) && validateWhere(where)
 }

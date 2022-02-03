@@ -132,3 +132,42 @@ func ExamplePlacekeyDistance() {
 	fmt.Printf("%.1f\n", dist/1000)
 	// Output: 13597.5
 }
+
+func TestValidatePlacekey(t *testing.T) {
+	type args struct {
+		pk string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "NY",
+			args: args{
+				pk: "@627-wbz-tjv",
+			},
+			want: true,
+		},
+
+		{
+			name: "good what part",
+			args: args{
+				pk: "226@5vg-7gq-5mk",
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := pk.ValidatePlacekey(tt.args.pk); got != tt.want {
+				t.Errorf("ValidatePlacekey() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func ExampleValidatePlacekey() {
+	fmt.Println(pk.ValidatePlacekey("@627-wbz-tjv"))
+	// Output: true
+}
