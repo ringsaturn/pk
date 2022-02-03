@@ -3,5 +3,6 @@
 References:
 
 - <https://www.placekey.io>
+- <https://docs.placekey.io>
 - <https://docs.placekey.io/Placekey_Encoding_Specification_White_Paper.pdf>
 - <https://github.com/Placekey/placekey-py>

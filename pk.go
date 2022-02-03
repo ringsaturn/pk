@@ -9,6 +9,9 @@
 // Because the resolution is a const `10`, so each H3 id under the same resolution
 // could remove common info.
 // Then use alphabet represent the 43-bit integer as the `where` part of the whole place key.
+//
+// The `what` part need use Placekey's API.
+// Check API doc https://docs.placekey.io
 package pk
 
 import (
@@ -245,7 +248,7 @@ func PlacekeyToH3(placekey string) (*h3.H3Index, error) {
 	return &idx, nil
 }
 
-// PlacekeyToGeo convert placekey to latitude,lontitude
+// PlacekeyToGeo convert placekey to latitude,longitude
 func PlacekeyToGeo(placekey string) (float64, float64, error) {
 	idx, err := PlacekeyToH3(placekey)
 	if err != nil {
