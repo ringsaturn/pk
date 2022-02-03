@@ -36,6 +36,9 @@ const (
 	_REPLACEMENT_CHARS = "eu"
 )
 
+// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID
+const _HIGH_RESOLUTION_SHIFT = 255
+
 var (
 	_BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
 	_UNUSED_RESOLUTION_FILLER = int64(math.Pow(2, (3*(15-_BASE_RESOLUTION))-1))
@@ -146,7 +149,7 @@ func shortenH3Integer(h3Int int64) int64 {
 func unshortenH3Integer(shortInt int64) int64 {
 	unshifted_int := shortInt << (3 * (15 - _BASE_RESOLUTION))
 	rebuilt_int := _HEADER_INT + _UNUSED_RESOLUTION_FILLER - _BASE_CELL_SHIFT + unshifted_int
-	return rebuilt_int
+	return rebuilt_int + _HIGH_RESOLUTION_SHIFT
 }
 
 func encodeH3Int(h3Int int64) string {
