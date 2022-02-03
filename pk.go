@@ -113,8 +113,6 @@ func init_H3_HEADER() {
 	}
 }
 
-// Degrees × π / 180
-
 func radians(degree float64) float64 {
 	return degree * math.Pi / 180
 }

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -58,7 +57,7 @@ func (c *Client) GetPlacekeyFromGeo(
 		},
 	}
 	apiBody, err := json.Marshal(apiRequest)
-	log.Println(string(apiBody))
+
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +123,7 @@ func (c *Client) GetPlacekeyFromAddress(
 		},
 	}
 	apiBody, err := json.Marshal(apiRequest)
-	log.Println(string(apiBody))
+
 	if err != nil {
 		return nil, err
 	}
