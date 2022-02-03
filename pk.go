@@ -26,18 +26,21 @@ import (
 )
 
 const (
+	// below const are copy from Python SDK and most of them can be found from
+	// Placekey white paper pdf.
 	_RESOLUTION        = 10
 	_BASE_RESOLUTION   = 12
-	_EARTH_RADIUS      = 6371 // km
-	_ALPHABET_BASE     = "23456789BCDFGHJKMNPQRSTVWXYZ"
+	_EARTH_RADIUS      = 6371                           // km, for distance computing
+	_ALPHABET_BASE     = "23456789BCDFGHJKMNPQRSTVWXYZ" // will be lower case when ini
 	_CODE_LENGTH       = 9
 	_TUPLE_LENGTH      = 3
 	_PADDING_CHAR      = "a"
 	_REPLACEMENT_CHARS = "eu"
 )
 
-// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID
-// TODO: check why Go SDK need this but Python SDK doesn't
+// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID.
+// Or will failed when `h3.IsValid(xxx)`.
+// TODO: check why Go SDK need this but Python SDK doesn't.
 const _HIGH_RESOLUTION_SHIFT = 255
 
 var (
@@ -51,7 +54,10 @@ var (
 	_TUPLE_REGEX              string         // build in init
 	_WHERE_REGEX              *regexp.Regexp // build in init
 	_WHAT_REGEX               *regexp.Regexp // build in init
-	_REPLACEMENT_MAP          = map[string]string{
+)
+
+var (
+	_REPLACEMENT_MAP = map[string]string{
 		"prn":   "pre",
 		"f4nny": "f4nne",
 		"tw4t":  "tw4e",
@@ -83,6 +89,7 @@ func init_ALPHABET_LENGTH() {
 	_WHAT_REGEX = regexp.MustCompile("^[" + _ALPHABET + "]{3,}(-[" + _ALPHABET + "]{3,})?$")
 }
 
+// zfill like Python's zfill
 func zfill(rawString string, padString string, expectLength int) string {
 	diff := expectLength - len(rawString)
 	if diff > 0 {
@@ -101,7 +108,6 @@ func init_H3_HEADER() {
 		2)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
-	// filled := xstrings.LeftJustify(idx, 64, "0")
 	filled := zfill(idx, "0", 64)
 	bits := filled[:12]
 	if bits != "000010001010" {
@@ -290,6 +296,8 @@ func validateWhere(where string) bool {
 	return _WHERE_REGEX.MatchString(where) && h3.IsValid(*h)
 }
 
+// ValidatePlacekey will use Regex and H3 to
+// validate Placekey's what(if provided) and where part.
 func ValidatePlacekey(pk string) bool {
 	what, where, err := parsePlacekey(pk)
 	if err != nil {
