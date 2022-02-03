@@ -37,6 +37,7 @@ const (
 )
 
 // _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID
+// TODO: check why Go SDK need this but Python SDK doesn't
 const _HIGH_RESOLUTION_SHIFT = 255
 
 var (
