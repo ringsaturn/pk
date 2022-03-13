@@ -31,7 +31,8 @@ func NewClient(apiKey string) (*Client, error) {
 
 type Response struct {
 	Placekey string `json:"placekey"`
-	Message  string `json:"message"`
+	QueryID  string `json:"query_id"` // filed default value is `"0"`
+	Message  string `json:"message"`  // message for error response
 }
 
 type getPlacekeyFromGeoRequestParam struct {
