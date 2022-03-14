@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
+	"github.com/ringsaturn/requests"
 	"go.uber.org/ratelimit"
 )
 
@@ -50,42 +49,28 @@ func (c *Client) GetPlacekeyFromGeo(
 	ctx context.Context, latitude float64, longitude float64,
 	queryID string) (*Response, error) {
 	_ = c.singleRL.Take()
-	apiRequest := &getPlacekeyFromGeoRequest{
+	apiBody, err := json.Marshal(&getPlacekeyFromGeoRequest{
 		Query: getPlacekeyFromGeoRequestParam{
 			Latitude:  latitude,
 			Longitude: longitude,
 			QueryID:   queryID,
 		},
-	}
-	apiBody, err := json.Marshal(apiRequest)
-
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	httpRequest, err := http.NewRequestWithContext(ctx, "POST", "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody))
-	if err != nil {
-		return nil, err
-	}
-	httpRequest.Header.Add("apiKey", c.apiKey)
-	httpRequest.Header.Add("Content-Type", "application/json")
-
-	httpResponse, err := c.httpClient.Do(httpRequest)
-	if err != nil {
-		return nil, err
-	}
-	defer httpResponse.Body.Close()
-
-	respBodyBytes, err := ioutil.ReadAll(httpResponse.Body)
-	if err != nil {
-		return nil, err
-	}
-	if statusCode := httpResponse.StatusCode; statusCode != http.StatusOK {
-		return nil, fmt.Errorf("status_code=%v resp=%v", statusCode, string(respBodyBytes))
 	}
 
 	resp := &Response{}
-	if err := json.Unmarshal(respBodyBytes, resp); err != nil {
+	err = requests.ReqWithExpectJSONResponse(
+		ctx, c.httpClient,
+		"POST", "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody),
+		resp,
+		requests.HeaderOption(map[string]string{
+			"apiKey":       c.apiKey,
+			"Content-Type": "application/json",
+		}),
+	)
+	if err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -113,7 +98,7 @@ func (c *Client) GetPlacekeyFromAddress(
 	queryID string,
 ) (*Response, error) {
 	_ = c.singleRL.Take()
-	apiRequest := &getPlacekeyFromAddressRequest{
+	apiBody, err := json.Marshal(&getPlacekeyFromAddressRequest{
 		Query: getPlacekeyFromAddressRequestParam{
 			StreetAddress:  streetAddress,
 			City:           city,
@@ -122,36 +107,22 @@ func (c *Client) GetPlacekeyFromAddress(
 			IsoCountryCode: isoCountryCode,
 			QueryID:        queryID,
 		},
-	}
-	apiBody, err := json.Marshal(apiRequest)
-
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	httpRequest, err := http.NewRequestWithContext(ctx, "POST", "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody))
-	if err != nil {
-		return nil, err
-	}
-	httpRequest.Header.Add("apiKey", c.apiKey)
-	httpRequest.Header.Add("Content-Type", "application/json")
-
-	httpResponse, err := c.httpClient.Do(httpRequest)
-	if err != nil {
-		return nil, err
-	}
-	defer httpResponse.Body.Close()
-
-	respBodyBytes, err := ioutil.ReadAll(httpResponse.Body)
-	if err != nil {
-		return nil, err
-	}
-	if statusCode := httpResponse.StatusCode; statusCode != http.StatusOK {
-		return nil, fmt.Errorf("status_code=%v resp=%v", statusCode, string(respBodyBytes))
 	}
 
 	resp := &Response{}
-	if err := json.Unmarshal(respBodyBytes, resp); err != nil {
+	err = requests.ReqWithExpectJSONResponse(
+		ctx, c.httpClient,
+		"POST", "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody),
+		resp,
+		requests.HeaderOption(map[string]string{
+			"apiKey":       c.apiKey,
+			"Content-Type": "application/json",
+		}),
+	)
+	if err != nil {
 		return nil, err
 	}
 	return resp, nil
