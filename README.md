@@ -4,6 +4,20 @@
 go install github.com/ringsaturn/pk
 ```
 
+Cli usage:
+
+```bash
+go install github.com/ringsaturn/pk/cmd/placekey@latest
+
+# ToGeo
+placekey ToGeo -pk "@627-wbz-tjv"
+40.71237820442784 -74.0056425771711
+
+# FromGeo
+placekey FromGeo -lat 40.71237820442784 -long -74.0056425771711
+@627-wbz-tjv
+```
+
 References:
 
 - <https://www.placekey.io>
