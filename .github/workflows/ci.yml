@@ -9,20 +9,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      GOPROXY: https://proxy.golang.org
     strategy:
       matrix:
-        go: ["1.17"]
+        go: ["1.19"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -42,3 +40,4 @@ jobs:
         run: |
           golangci-lint run ./...
           go test -race ./...
+          go test -bench=. ./...
