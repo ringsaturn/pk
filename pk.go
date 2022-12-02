@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/huandu/xstrings"
-	"github.com/uber/h3-go"
+	"github.com/uber/h3-go/v4"
 )
 
 const (
@@ -99,13 +99,7 @@ func zfill(rawString string, padString string, expectLength int) string {
 }
 
 func init_H3_HEADER() {
-	idx := strconv.FormatInt(
-		int64(
-			h3.FromGeo(
-				h3.GeoCoord{Latitude: 0, Longitude: 0},
-				_RESOLUTION,
-			)),
-		2)
+	idx := strconv.FormatInt(int64(h3.NewLatLng(0, 0).Cell(_RESOLUTION)), 2)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
 	filled := zfill(idx, "0", 64)
@@ -197,10 +191,7 @@ func GeoToPlacekey(lat, long float64) (string, error) {
 	if lat < -90 || lat > 90 || long < -180 || long > 180 {
 		return "", errors.New("invalid lat/long range")
 	}
-	return encodeH3Int(int64(h3.FromGeo(
-		h3.GeoCoord{Latitude: lat, Longitude: long},
-		_RESOLUTION,
-	))), nil
+	return encodeH3Int(int64(h3.NewLatLng(lat, long).Cell(_RESOLUTION))), nil
 }
 
 func parsePlacekey(placekey string) (string, string, error) {
@@ -251,13 +242,12 @@ func decodeToH3Int(wherePart string) int64 {
 }
 
 // PlacekeyToH3 convert placekey to H3 Index
-func PlacekeyToH3(placekey string) (*h3.H3Index, error) {
+func PlacekeyToH3(placekey string) (*h3.Cell, error) {
 	_, where, err := parsePlacekey(placekey)
 	if err != nil {
 		return nil, err
 	}
-	h3Int := decodeToH3Int(where)
-	idx := h3.FromString(strconv.FormatUint(uint64(h3Int), 16))
+	idx := h3.Cell(decodeToH3Int(where))
 	return &idx, nil
 }
 
@@ -267,8 +257,9 @@ func PlacekeyToGeo(placekey string) (float64, float64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	h3Idx := h3.ToGeo(*idx)
-	return h3Idx.Latitude, h3Idx.Longitude, nil
+	lat := idx.LatLng().Lat
+	lng := idx.LatLng().Lng
+	return lat, lng, nil
 }
 
 func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
@@ -293,7 +284,7 @@ func validateWhere(where string) bool {
 	if err != nil {
 		return false
 	}
-	return _WHERE_REGEX.MatchString(where) && h3.IsValid(*h)
+	return _WHERE_REGEX.MatchString(where) && h.IsValid()
 }
 
 // ValidatePlacekey will use Regex and H3 to

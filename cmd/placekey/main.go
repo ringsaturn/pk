@@ -8,8 +8,10 @@ import (
 	"github.com/ringsaturn/pk"
 )
 
-const FromGeoFlag = "FromGeo"
-const ToGeoFlag = "ToGeo"
+const (
+	FromGeoFlag = "FromGeo"
+	ToGeoFlag   = "ToGeo"
+)
 
 func showErr() {
 	fmt.Printf("expected '%v' or '%v' subcommands\n", FromGeoFlag, ToGeoFlag)
