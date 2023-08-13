@@ -36,12 +36,12 @@ const (
 	_TUPLE_LENGTH      = 3
 	_PADDING_CHAR      = "a"
 	_REPLACEMENT_CHARS = "eu"
-)
 
-// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID.
-// Or will failed when `h3.IsValid(xxx)`.
-// TODO: check why Go SDK need this but Python SDK doesn't.
-const _HIGH_RESOLUTION_SHIFT = 255
+	// _HIGH_RESOLUTION_OFFSET used when Placekey convert back to H3 ID.
+	// Or will failed when `h3.IsValid(xxx)`.
+	// TODO: check why Go SDK need this but Python SDK doesn't.
+	_HIGH_RESOLUTION_SHIFT = 255
+)
 
 var (
 	_BASE_CELL_SHIFT          = int64(math.Pow(2, 45)) // Adding this will increment the base cell value by 1
@@ -54,9 +54,7 @@ var (
 	_TUPLE_REGEX              string         // build in init
 	_WHERE_REGEX              *regexp.Regexp // build in init
 	_WHAT_REGEX               *regexp.Regexp // build in init
-)
 
-var (
 	_REPLACEMENT_MAP = map[string]string{
 		"prn":   "pre",
 		"f4nny": "f4nne",
