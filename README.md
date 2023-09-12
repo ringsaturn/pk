@@ -20,7 +20,7 @@ fmt.Printf("%.3f %.3f \n", lat, long)
 // Output: 39.929 116.388
 ```
 
-More usage example: <https://pkg.go.dev/github.com/ringsaturn/pk#pkg-examples>
+More usage examples: <https://pkg.go.dev/github.com/ringsaturn/pk#pkg-examples>
 
 ## CLI usage
 
