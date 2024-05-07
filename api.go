@@ -59,7 +59,12 @@ type getPlacekeyFromGeoRequest struct {
 	Query getPlacekeyFromGeoRequestParam `json:"query"`
 }
 
-func (c *Client) req(ctx context.Context, method string, url string, body io.Reader) (*Response, error) {
+func (c *Client) req(
+	ctx context.Context,
+	_ string, // method string
+	_ string, // url string
+	body io.Reader,
+) (*Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.placekey.io/v1/placekey/", body)
 	if err != nil {
 		return nil, err
