@@ -54,6 +54,7 @@ var (
 	_TUPLE_REGEX              string         // build in init
 	_WHERE_REGEX              *regexp.Regexp // build in init
 	_WHAT_REGEX               *regexp.Regexp // build in init
+	_WHAT_V2_REGEX            *regexp.Regexp // build in init
 
 	_REPLACEMENT_MAP = map[string]string{
 		"prn":   "pre",
@@ -85,6 +86,8 @@ func init_ALPHABET_LENGTH() {
 	_TUPLE_REGEX = "[" + _ALPHABET + _REPLACEMENT_CHARS + "]{3}"
 	_WHERE_REGEX = regexp.MustCompile("^" + strings.Join([]string{_FIRST_TUPLE_REGEX, _TUPLE_REGEX, _TUPLE_REGEX}, "-") + "$")
 	_WHAT_REGEX = regexp.MustCompile("^[" + _ALPHABET + "]{3,}(-[" + _ALPHABET + "]{3,})?$")
+
+	_WHAT_V2_REGEX = regexp.MustCompile("^[01][abcdefghijklmnopqrstuvwxyz234567]{9}$")
 }
 
 // zfill like Python's zfill
@@ -274,7 +277,7 @@ func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
 }
 
 func validateWhat(what string) bool {
-	return _WHAT_REGEX.MatchString(what)
+	return _WHAT_REGEX.MatchString(what) || _WHAT_V2_REGEX.MatchString(what)
 }
 
 func validateWhere(where string) bool {

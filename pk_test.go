@@ -149,13 +149,33 @@ func TestValidatePlacekey(t *testing.T) {
 			},
 			want: true,
 		},
-
 		{
 			name: "good what part",
 			args: args{
 				pk: "226@5vg-7gq-5mk",
 			},
 			want: true,
+		},
+		{
+			name: "v2 what part case 1",
+			args: args{
+				pk: "0rsdbudq45@5vg-7gq-5mk",
+			},
+			want: true,
+		},
+		{
+			name: "v2 what part case 1",
+			args: args{
+				pk: "1rsdbudq45@5vg-7gq-5mk",
+			},
+			want: true,
+		},
+		{
+			name: "v2 what part case 3",
+			args: args{
+				pk: "7rsdbudq45@5vg-7gt-tn5",
+			},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
@@ -165,6 +185,24 @@ func TestValidatePlacekey(t *testing.T) {
 			}
 		})
 	}
+}
+
+func BenchmarkValidatePlacekey(b *testing.B) {
+	b.Run("v1 valid", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			pk.ValidatePlacekey("226@5vg-7gq-5mk")
+		}
+	})
+	b.Run("v2 valid", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			pk.ValidatePlacekey("0rsdbudq45@5vg-7gq-5mk")
+		}
+	})
+	b.Run("v2 not valid", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			pk.ValidatePlacekey("7rsdbudq45@5vg-7gq-5mk")
+		}
+	})
 }
 
 func ExampleValidatePlacekey() {
