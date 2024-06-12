@@ -43,7 +43,7 @@ Output:
 `FromGeo`
 
 ```bash
-placekey FromGeo -lat 40.71237820442784 -long -74.0056425771711
+placekey FromGeo -lat 40.71237820442784 -lng -74.0056425771711
 ```
 
 Output:
