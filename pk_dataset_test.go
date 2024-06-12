@@ -28,18 +28,18 @@ func TestPlaceKeyDataset(t *testing.T) {
 			continue
 		}
 		lat_str := rawparts[0]
-		long_str := rawparts[1]
+		lng_str := rawparts[1]
 		placekey_str := rawparts[4]
 
 		lat_float, err := strconv.ParseFloat(lat_str, 64)
 		if err != nil {
 			panic(err)
 		}
-		long_float, err := strconv.ParseFloat(long_str, 64)
+		lng_float, err := strconv.ParseFloat(lng_str, 64)
 		if err != nil {
 			panic(err)
 		}
-		placeKey, err := pk.GeoToPlacekey(lat_float, long_float)
+		placeKey, err := pk.GeoToPlacekey(lat_float, lng_float)
 		if err != nil {
 			panic(err)
 		}

@@ -127,15 +127,15 @@ func radians(degree float64) float64 {
 	return degree * math.Pi / 180
 }
 
-func geoDistance(lat1, long1, lat2, long2 float64) float64 {
+func geoDistance(lat1, lng1, lat2, lng2 float64) float64 {
 	lat1 = radians(lat1)
-	long1 = radians(long1)
+	lng1 = radians(lng1)
 	lat2 = radians(lat2)
-	long2 = radians(long2)
+	lng2 = radians(lng2)
 
 	hav_lat := 0.5 * (1 - math.Cos(lat1-lat2))
-	hav_long := 0.5 * (1 - math.Cos(long1-long2))
-	radical := math.Sqrt(hav_lat + math.Cos(lat1)*math.Cos(lat2)*hav_long)
+	hav_lng := 0.5 * (1 - math.Cos(lng1-lng2))
+	radical := math.Sqrt(hav_lat + math.Cos(lat1)*math.Cos(lat2)*hav_lng)
 	return 2 * _EARTH_RADIUS * math.Asin(radical) * 1000
 }
 
@@ -188,11 +188,11 @@ func cleanString(s string) string {
 	return s
 }
 
-func GeoToPlacekey(lat, long float64) (string, error) {
-	if lat < -90 || lat > 90 || long < -180 || long > 180 {
-		return "", errors.New("invalid lat/long range")
+func GeoToPlacekey(lat, lng float64) (string, error) {
+	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
+		return "", errors.New("invalid lat/lng range")
 	}
-	return encodeH3Int(int64(h3.NewLatLng(lat, long).Cell(_RESOLUTION))), nil
+	return encodeH3Int(int64(h3.NewLatLng(lat, lng).Cell(_RESOLUTION))), nil
 }
 
 func parsePlacekey(placekey string) (string, string, error) {
@@ -264,16 +264,16 @@ func PlacekeyToGeo(placekey string) (float64, float64, error) {
 }
 
 func PlacekeyDistance(pk1 string, pk2 string) (float64, error) {
-	lat1, long1, err := PlacekeyToGeo(pk1)
+	lat1, lng1, err := PlacekeyToGeo(pk1)
 	if err != nil {
 		return 0, err
 	}
 
-	lat2, long2, err := PlacekeyToGeo(pk2)
+	lat2, lng2, err := PlacekeyToGeo(pk2)
 	if err != nil {
 		return 0, err
 	}
-	return geoDistance(lat1, long1, lat2, long2), nil
+	return geoDistance(lat1, lng1, lat2, lng2), nil
 }
 
 func validateWhat(what string) bool {

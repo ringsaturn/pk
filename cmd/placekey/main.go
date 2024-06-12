@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	FromGeoFlag = "FromGeo"
-	ToGeoFlag   = "ToGeo"
+	FromGeoFlag = "from-geo"
+	ToGeoFlag   = "to-geo"
 )
 
 func showErr() {
@@ -28,11 +28,11 @@ func main() {
 	case FromGeoFlag:
 		FromGeoCmd := flag.NewFlagSet(FromGeoFlag, flag.ExitOnError)
 		lat := FromGeoCmd.Float64("lat", 0, "latitude")
-		long := FromGeoCmd.Float64("long", 0, "longitude")
+		lng := FromGeoCmd.Float64("lng", 0, "longitude")
 		if err := FromGeoCmd.Parse(os.Args[2:]); err != nil {
 			panic(err)
 		}
-		placeKey, err := pk.GeoToPlacekey(*lat, *long)
+		placeKey, err := pk.GeoToPlacekey(*lat, *lng)
 		if err != nil {
 			panic(err)
 		}
