@@ -1,12 +1,11 @@
 package pk_test
 
 import (
+	_ "embed"
 	"math"
 	"strconv"
 	"strings"
 	"testing"
-
-	_ "embed"
 
 	"github.com/ringsaturn/pk"
 )
