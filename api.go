@@ -61,8 +61,6 @@ type getPlacekeyFromGeoRequest struct {
 
 func (c *Client) req(
 	ctx context.Context,
-	_ string, // method string
-	_ string, // url string
 	body io.Reader,
 ) (*Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.placekey.io/v1/placekey/", body)
@@ -107,7 +105,7 @@ func (c *Client) GetPlacekeyFromGeo(
 	if err != nil {
 		return nil, err
 	}
-	return c.req(ctx, http.MethodPost, "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody))
+	return c.req(ctx, bytes.NewBuffer(apiBody))
 }
 
 type getPlacekeyFromAddressRequestParam struct {
@@ -145,5 +143,5 @@ func (c *Client) GetPlacekeyFromAddress(
 	if err != nil {
 		return nil, err
 	}
-	return c.req(ctx, http.MethodPost, "https://api.placekey.io/v1/placekey/", bytes.NewBuffer(apiBody))
+	return c.req(ctx, bytes.NewBuffer(apiBody))
 }
