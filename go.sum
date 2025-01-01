@@ -8,8 +8,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/uber/h3-go/v4 v4.1.2 h1:QHGEcldBZArx51UyTkQprFMUXaIlEkLV88zWUt8u2LY=
-github.com/uber/h3-go/v4 v4.1.2/go.mod h1:VDpXVn4NLetBoISLEbiTVNstwW00bhHolV8I+jx9G+4=
+github.com/uber/h3-go/v4 v4.2.0 h1:Gv8zTAXXa5xkribMh328ZoOVgeLZRyPMdgjdD0BPdRU=
+github.com/uber/h3-go/v4 v4.2.0/go.mod h1:SkJtzM1NvRicoJdlcPuhXIR/2m2aah6TxUVW8bYui7Y=
 go.uber.org/atomic v1.7.0 h1:ADUqmZGgLDDfbSL9ZmPxKTybcoEYHgpYfELNoN+7hsw=
 go.uber.org/atomic v1.7.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
 go.uber.org/ratelimit v0.3.1 h1:K4qVE+byfv/B3tC+4nYWP7v/6SimcO7HzHekoMNBma0=
