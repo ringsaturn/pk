@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/huandu/xstrings v1.5.0
-	github.com/uber/h3-go/v4 v4.1.2
+	github.com/uber/h3-go/v4 v4.2.0
 	go.uber.org/ratelimit v0.3.1
 )
 
