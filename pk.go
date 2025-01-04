@@ -16,6 +16,7 @@ package pk
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"regexp"
 	"strconv"
@@ -100,7 +101,12 @@ func zfill(rawString string, padString string, expectLength int) string {
 }
 
 func init_H3_HEADER() {
-	idx := strconv.FormatInt(int64(h3.NewLatLng(0, 0).Cell(_RESOLUTION)), 2)
+	cell, cellErr := h3.NewLatLng(0, 0).Cell(_RESOLUTION)
+	if cellErr != nil {
+		panic(cellErr)
+	}
+	idx := strconv.FormatInt(int64(cell), 2)
+	fmt.Println(idx)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
 	filled := zfill(idx, "0", 64)
@@ -192,7 +198,11 @@ func GeoToPlacekey(lat, lng float64) (string, error) {
 	if lat < -90 || lat > 90 || lng < -180 || lng > 180 {
 		return "", errors.New("invalid lat/lng range")
 	}
-	return encodeH3Int(int64(h3.NewLatLng(lat, lng).Cell(_RESOLUTION))), nil
+	cell, cellErr := h3.NewLatLng(lat, lng).Cell(_RESOLUTION)
+	if cellErr != nil {
+		return "", cellErr
+	}
+	return encodeH3Int(int64(cell)), nil
 }
 
 func parsePlacekey(placekey string) (string, string, error) {
@@ -258,8 +268,14 @@ func PlacekeyToGeo(placekey string) (float64, float64, error) {
 	if err != nil {
 		return 0, 0, err
 	}
-	lat := idx.LatLng().Lat
-	lng := idx.LatLng().Lng
+
+	idxLoc, err := idx.LatLng()
+	if err != nil {
+		return 0, 0, err
+	}
+	lat := idxLoc.Lat
+	lng := idxLoc.Lng
+
 	return lat, lng, nil
 }
 
