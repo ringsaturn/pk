@@ -16,7 +16,6 @@ package pk
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"regexp"
 	"strconv"
@@ -106,7 +105,6 @@ func init_H3_HEADER() {
 		panic(cellErr)
 	}
 	idx := strconv.FormatInt(int64(cell), 2)
-	fmt.Println(idx)
 	// Python bin(xxx) result has prefix "0bxxxxx"
 	// Golang FormatInt does not
 	filled := zfill(idx, "0", 64)
