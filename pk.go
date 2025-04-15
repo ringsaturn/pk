@@ -235,7 +235,7 @@ func dirtyString(s string) string {
 func decodeString(s string) int64 {
 	var val int64
 	reversedS := xstrings.Reverse(s)
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		targetTogetIndex := string(reversedS[i])
 		val += int64(math.Pow(float64(_ALPHABET_LENGTH), float64(i))) *
 			int64(strings.Index(_ALPHABET, targetTogetIndex))
