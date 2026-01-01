@@ -1,10 +1,10 @@
 module github.com/ringsaturn/pk
 
-go 1.22
+go 1.23
 
 require (
 	github.com/huandu/xstrings v1.5.0
-	github.com/uber/h3-go/v4 v4.3.0
+	github.com/uber/h3-go/v4 v4.4.0
 	go.uber.org/ratelimit v0.3.1
 )
 
